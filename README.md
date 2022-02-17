@@ -3,11 +3,11 @@
     <img src="https://img.vim-cn.com/69/df015dc73fc71da07c3264766e8032ac042fed.png" alt="图飞了😂" title="opentopd" align="right" height="180" />
 </a>
 
-欢迎来到sirpdboy的源码仓库！
+欢迎来到zxmlysxl的源码仓库！
 =
 Welcome to sirpdboy's  git source of packages
 -
-[sirpdboy-package 常用插件](https://github.com/sirpdboy/sirpdboy-package)
+[zxmlysxl 常用插件](https://github.com/zxmlysxl/zuoxm)
 ==========================================
 
 [![](https://img.shields.io/badge/-目录:-696969.svg)](#readme) [![](https://img.shields.io/badge/-编译说明-F5F5F5.svg)](#编译说明-) [![](https://img.shields.io/badge/-插件说明-F5F5F5.svg)](#插件说明-) [![](https://img.shields.io/badge/-说明-F5F5F5.svg)](#说明-) [![](https://img.shields.io/badge/-捐助-F5F5F5.svg)](#捐助-) 
@@ -24,13 +24,13 @@ Welcome to sirpdboy's  git source of packages
 
 ```Brach
     # 在feeds.conf.default加入
-    src-git opentopd  https://github.com/sirpdboy/sirpdboy-package
+    src-git zuoxm  https://github.com/zxmlysxl/zuoxm
  ``` 
 
 ## 食用方法二：
  ```Brach
     # git获取源码
-    git clone https://github.com/siropboy/sirpdboy-package package/sirpdboy-package
+    git clone https://github.com/zxmlysxl/zuoxm package/zuoxm
     make menuconfig
  ``` 
  
@@ -69,28 +69,7 @@ luci-theme-opentoks-------------------仿LEDE主题（适配18.06）
 
 ## 说明 [![](https://img.shields.io/badge/-说明-F5F5F5.svg)](#说明-)
 
-源码来源：https://github.com/sirpdboy/sirpdboy-package
+源码来源：https://github.com/zxmlysxl/zuoxm
 
 感谢LEAN大，感谢LEO大 等大神分享源码，你可以随意使用其中的源码，但请注明出处。
 ============================
-
-
-# My other project
-网络速度测试 ：https://github.com/sirpdboy/NetSpeedTest
-
-定时关机重启 : https://github.com/sirpdboy/luci-app-autopoweroff
-
-关机功能插件 : https://github.com/sirpdboy/luci-app-poweroffdevice
-
-opentopd主题 : https://github.com/sirpdboy/luci-theme-opentopd
-
-opentoks 主题: https://github.com/sirpdboy/luci-theme-opentoks [仿KOOLSAHRE主题]
-
-btmob 主题: https://github.com/sirpdboy/luci-theme-btmob
-
-系统高级设置 : https://github.com/sirpdboy/luci-app-advanced
-
-###### [解决 Github 网页上图片显示失败的问题](https://blog.csdn.net/qq_38232598/article/details/91346392)
-
-[![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
-
