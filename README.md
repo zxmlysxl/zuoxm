@@ -5,8 +5,6 @@
 
 欢迎来到zxmlysxl的源码仓库！
 =
-Welcome to sirpdboy's  git source of packages
--
 [zxmlysxl 常用插件](https://github.com/zxmlysxl/zuoxm)
 ==========================================
 
