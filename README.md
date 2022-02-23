@@ -1,15 +1,9 @@
-[![若部分图片无法正常显示，请挂上机场浏览或点这里到末尾看修复教程](https://visitor-badge.glitch.me/badge?page_id=sirpdboy-visitor-badge)](#解决-github-网页上图片显示失败的问题)
-<a href="#readme">
-    <img src="https://img.vim-cn.com/69/df015dc73fc71da07c3264766e8032ac042fed.png" alt="图飞了😂" title="opentopd" align="right" height="180" />
-</a>
-
 欢迎来到zxmlysxl的源码仓库！
 =
 [zxmlysxl 常用插件](https://github.com/zxmlysxl/zuoxm)
 ==========================================
 
-[![](https://img.shields.io/badge/-目录:-696969.svg)](#readme) [![](https://img.shields.io/badge/-编译说明-F5F5F5.svg)](#编译说明-) [![](https://img.shields.io/badge/-插件说明-F5F5F5.svg)](#插件说明-) [![](https://img.shields.io/badge/-说明-F5F5F5.svg)](#说明-) [![](https://img.shields.io/badge/-捐助-F5F5F5.svg)](#捐助-) 
-
+[![](https://img.shields.io/badge/-目录:-696969.svg)](#readme) [![](https://img.shields.io/badge/-编译说明-F5F5F5.svg)](#编译说明-) [![](https://img.shields.io/badge/-插件说明-F5F5F5.svg)](#插件说明-) [![](https://img.shields.io/badge/-说明-F5F5F5.svg)](#说明-)
 请 **认真阅读完毕** 本页面，本页面包含注意事项和如何使用。
 
 ## 写在前面：
