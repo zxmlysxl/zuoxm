@@ -11,6 +11,6 @@ config service 'ipsec'
 
 config users
 	option enabled '1'
-        option username 'sirpdboy'
+        option username 'zuoxm'
 	option password '123456'
 
