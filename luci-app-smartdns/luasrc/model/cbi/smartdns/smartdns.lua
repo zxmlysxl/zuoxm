@@ -126,7 +126,7 @@ o = s:taboption("settings", Flag, "force_https_soa", translate("Force HTTPS SOA"
 o.rmempty     = false
 o.default     = o.enabled
 o.cfgvalue    = function(...)
-    return Flag.cfgvalue(...) or "0"
+    return Flag.cfgvalue(...) or "1"
 end
 
 ---- rr-ttl
@@ -147,6 +147,14 @@ o.rempty      = true
 ---- rr-ttl-reply-max
 o = s:taboption("settings", Value, "rr_ttl_reply_max", translate("Reply Domain TTL Max"), translate("Reply maximum TTL for all domain result."))
 o.rempty      = true
+
+---- Update china list(GFW)
+o = s:taboption("settings", Flag, "gfw_smartdns", translate("Update China list And Advertising Data"), translate("If you need to use the Chinese domain name file and Advertising data, Remove the # sign before 'conf-file' in the custom settings."))
+o.rmempty     = false
+o.default     = o.disabled
+o.cfgvalue    = function(...)
+    return Flag.cfgvalue(...) or "0"
+end
 
 ---- second dns server
 ---- Eanble
@@ -365,6 +373,14 @@ o.inputtitle = translate("Donate")
 o.inputstyle = "apply"
 o.write = function()
 	luci.http.redirect("https://pymumu.github.io/smartdns/#donate")
+end
+
+o = s:option(Button, "Restart")
+o.title = translate("Restart Service")
+o.inputtitle = translate("Restart")
+o.inputstyle = "apply"
+o.write = function()
+	luci.sys.call("/etc/init.d/smartdns restart")
 end
 
 return m
