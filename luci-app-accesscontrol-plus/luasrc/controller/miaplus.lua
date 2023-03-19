@@ -5,12 +5,12 @@ function index()
 		return
 	end
 
-	entry({"admin", "services", "miaplus"}, cbi("base"), _("Internet Access Schedule Control Plus"), 30).dependent = true
-	entry({"admin", "services", "miaplus", "status"}, call("act_status")).leaf = true
+	entry({"admin", "control", "miaplus"}, cbi("base"), _("Internet Access Schedule Control Plus"), 30).dependent = true
+	entry({"admin", "control", "miaplus", "status"}, call("act_status")).leaf = true
 
-	entry({"admin", "services", "miaplus", "base"}, cbi("base"), _("Base Setting"), 40).leaf = true
-	entry({"admin", "services", "miaplus", "advanced"}, cbi("advanced"), _("Advance Setting"), 50).leaf = true
-	entry({"admin", "services", "miaplus", "template"}, cbi("template"), nil).leaf = true
+	entry({"admin", "control", "miaplus", "base"}, cbi("base"), _("Base Setting"), 40).leaf = true
+	entry({"admin", "control", "miaplus", "advanced"}, cbi("advanced"), _("Advance Setting"), 50).leaf = true
+	entry({"admin", "control", "miaplus", "template"}, cbi("template"), nil).leaf = true
 end
 
 function act_status()

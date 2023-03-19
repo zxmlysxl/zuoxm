@@ -7,7 +7,7 @@ t.template = "cbi/tblsection"
 t.anonymous = true
 t.addremove = true
 t.sortable  = true
-t.extedit   = ds.build_url("admin/services/miaplus/template/%s")
+t.extedit   = ds.build_url("admin/control/miaplus/template/%s")
 
 e = t:option(Flag, "enable", translate("Enabled"))
 e.rmempty = false
