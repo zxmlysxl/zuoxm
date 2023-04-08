@@ -27,24 +27,23 @@ do
  		[ -z "$week" -o "$week" = "*" ] && WEEK="" || WEEK="--weekdays ${week}"
  		[ -n "$TIME" -o -n "$WEEK" ] && WT="-m time --kerneltz ${TIME} ${WEEK}" || WT=""
 
-		logger "PARENTCONTROL:WT${WT}  PTO${PTO} MAC${MAC}   STR${STR} "
 		if [ -n "$STR" -a "x$word" = "x!" ] ; then
 			iptables   -I PARENTCONTROL ${WT} ${PTO} ${MAC} -j ${mode_reo} 2>/dev/null
 			ip6tables  -I PARENTCONTROL ${WT} ${PTO} ${MAC} -j ${mode_reo} 2>/dev/null
-			logger "PARENTCONTROL1:WT${WT}  PTO${PTO} MAC${MAC}  STR${STR} ${mode_reo}"
+			logger "PARENTCONTROL1:${WT} ${PTO} ${MAC} -j ${mode_reo}"
 		elif [ -z "$STR" ] ; then
 			iptables   -A PARENTCONTROL ${WT} ${PTO} ${MAC} -j ${mode_rej} 2>/dev/null 
 			ip6tables  -A PARENTCONTROL ${WT} ${PTO} ${MAC} -j ${mode_rej} 2>/dev/null
-			logger "PARENTCONTROL2:WT${WT}  PTO${PTO} MAC${MAC}  STR${STR} ${mode_rej}"
+			logger "PARENTCONTROL2:${WT} ${PTO} ${MAC} -j ${mode_rej}"
 		fi
 		if [ $control_mode == "white_mode" -o  -n "$STR"  ]; then
 			iptables   -I PARENTCONTROL ${STR} ${WT} ${MAC} -j ${mode_reo} 2>/dev/null
 			ip6tables  -I PARENTCONTROL ${STR} ${WT} ${MAC} -j ${mode_reo} 2>/dev/null
-			logger "PARENTCONTROL3:WT${WT}  PTO${PTO} MAC${MAC}  STR${STR} ${mode_reo} "
+			logger "PARENTCONTROL3:${STR} ${WT} ${MAC} -j ${mode_reo} "
 		elif [ -n "$STR" ] ; then
 			iptables   -I PARENTCONTROL ${STR} ${WT} ${MAC} -j ${mode_rej} 2>/dev/null
 			ip6tables  -I PARENTCONTROL ${STR} ${WT} ${MAC} -j ${mode_rej} 2>/dev/null
-			logger "PARENTCONTROL4:WT${WT} PTO${PTO} MAC${MAC} STR${STR}  ${mode_rej}"
+			logger "PARENTCONTROL4:${STR} ${WT} ${MAC} -j ${mode_rej}"
 		fi  
 		unset STR MAC WT PTO
 fi
@@ -95,6 +94,13 @@ stop(){
 iptables   -D FORWARD -j PARENTCONTROL 2>/dev/null
 ip6tables  -D FORWARD -j PARENTCONTROL 2>/dev/null
 iptables   -F PARENTCONTROL 2>/dev/null
+ip6tables  -F PARENTCONTROL 2>/dev/null
+iptables   -X PARENTCONTROL 2>/dev/null
+ip6tables  -X PARENTCONTROL 2>/dev/null
+ 
+}
+
+dev/null
 ip6tables  -F PARENTCONTROL 2>/dev/null
 iptables   -X PARENTCONTROL 2>/dev/null
 ip6tables  -X PARENTCONTROL 2>/dev/null

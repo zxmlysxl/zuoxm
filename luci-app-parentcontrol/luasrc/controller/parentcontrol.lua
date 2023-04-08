@@ -15,7 +15,11 @@ end
 function status()
     local e = {} 
     e.status = luci.sys.call("iptables -L FORWARD|grep PARENTCONTROL >/dev/null") == 0
-    -- e.status=luci.sys.call("[ `iptables -L FORWARD 2>/dev/null|grep -c '^PARENTCONTROL' 2>/dev/null` -gt 0 ] > /dev/null") == 0
+    
+    luci.http.prepare_content("application/json")
+    luci.http.write_json(e)
+end
+OL' 2>/dev/null` -gt 0 ] > /dev/null") == 0
     luci.http.prepare_content("application/json")
     luci.http.write_json(e)
 end
