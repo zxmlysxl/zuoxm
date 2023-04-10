@@ -100,10 +100,3 @@ ip6tables  -X PARENTCONTROL 2>/dev/null
  
 }
 
-dev/null
-ip6tables  -F PARENTCONTROL 2>/dev/null
-iptables   -X PARENTCONTROL 2>/dev/null
-ip6tables  -X PARENTCONTROL 2>/dev/null
- 
-}
-

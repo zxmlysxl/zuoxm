@@ -19,7 +19,3 @@ function status()
     luci.http.prepare_content("application/json")
     luci.http.write_json(e)
 end
-OL' 2>/dev/null` -gt 0 ] > /dev/null") == 0
-    luci.http.prepare_content("application/json")
-    luci.http.write_json(e)
-end

@@ -1,49 +1,49 @@
+
 config basic
 	option algos 'kmp'
 	option control_mode 'black_mode'
-	option enabled '0'
+	option enabled '1'
 
 config time
-	option timeoff '00:00'
-	option timeon '00:00'
-	option daysofweek 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'
-	option enable '0'
-
-
-config weburl
-	option timeon '00:00'
-	option timeoff '00:00'
-	option daysofweek 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'
-	option keyword 'baidu'
-	option enable '0'
+	option timestart '00:00'
+	option timeend '00:00'
+	option week '1,2,3,4,5'
+	option enable '1'
 
 config weburl
-	option timeon '00:00'
-	option timeoff '00:00'
-	option daysofweek 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'
-	option keyword 'www'
 	option enable '0'
+	option word 'baidu'
+	option timestart '00:00'
+	option timeend '00:00'
+	option week '*'
 
-config protocol
-	option timeon '00:00'
-	option daysofweek 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'
-	option proto 'tcp'
-	option timeoff '00:00'
+config weburl
 	option enable '0'
-	option dport '80'
-	
-config protocol
-	option proto 'tcp'
-	option timeon '00:00'
-	option timeoff '00:00'
-	option daysofweek 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'
-	option enable '0'
-	option dport '443'
+	option word 'www'
+	option timestart '00:00'
+	option timeend '00:00'
+	option week '*'
 
 config protocol
 	option proto 'tcp'
-	option timeon '00:00'
-	option timeoff '00:00'
-	option daysofweek 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'
 	option enable '0'
-	option dport '22'
+	option timestart '00:00'
+	option timeend '00:00'
+	option week '*'
+	option portd '80'
+
+config protocol
+	option proto 'tcp'
+	option enable '0'
+	option timestart '00:00'
+	option timeend '00:00'
+	option week '*'
+	option portd '443'
+
+config protocol
+	option proto 'tcp'
+	option enable '0'
+	option timestart '00:00'
+	option timeend '00:00'
+	option week '1,2,3,4,5'
+
