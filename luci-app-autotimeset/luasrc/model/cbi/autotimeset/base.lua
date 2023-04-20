@@ -56,8 +56,4 @@ e=s:option(Flag,"enable",translate("Enable"))
 e.rmempty = false
 e.default=0
 
-m.apply_on_parse = true
-m.on_after_apply = function(self,map)
-  io.popen("/etc/init.d/autotimeset start")
-end
 return m
