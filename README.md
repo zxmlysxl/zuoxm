@@ -63,5 +63,5 @@ luci-theme-opentoks-------------------仿LEDE主题（适配18.06）
 
 源码来源：https://github.com/zxmlysxl/zuoxm
 
-感谢LEAN大，感谢LEO大 等大神分享源码，你可以随意使用其中的源码，但请注明出处。
+感谢LEAN大，感谢LEO大、sirpdboy等大神分享源码，你可以随意使用其中的源码，但请注明出处。
 ============================
