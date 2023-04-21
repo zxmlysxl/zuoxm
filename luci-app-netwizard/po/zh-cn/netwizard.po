@@ -76,8 +76,8 @@ msgstr "IPv6混合模式"
 msgid "Select IPv6 mode"
 msgstr "选择IPv6模式"
 
-msgid "Caution: If you delete IPV6 related plug-ins completely, you will not be able to recover "
-msgstr "慎重：彻底删除IPV6相关插件，删除后无法恢复 "
+msgid "Caution: If you delete IPV6 related plug-ins completely, you will not be able to recover"
+msgstr "慎重：彻底删除IPV6相关插件，删除后无法恢复"
 
 msgid "If it is not selected, IPv6 will be enabled, if it is selected, IPv6 will be disabled"
 msgstr "不选择为启用IPV6，选择为禁用IPV6"
