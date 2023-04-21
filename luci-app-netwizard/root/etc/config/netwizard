@@ -1,0 +1,10 @@
+
+config netwizard 'default'
+	option lan_netmask '255.255.255.0'
+	option wan_interface 'eth1'
+	option lan_ipaddr '192.168.32.1'
+	option ipv6 '3'
+	option wan_proto 'pppoe'
+	option wan_pppoe_user '07953228275'
+	option wan_pppoe_pass 'a3228275'
+
