@@ -1,0 +1,95 @@
+msgid "Advanced plus"
+msgstr "进阶设置"
+
+msgid "KuCat Theme Config"
+msgstr "酷猫主题设置"
+
+msgid "Theme Backgroud upload"
+msgstr "主题背景文件上传管理"
+
+msgid "Advanced Edit"
+msgstr "进阶参数编辑"
+
+msgid "Set and manage theme main color scheme, activate menu and list background color, theme shortcut and other functions."
+msgstr "设置和管理主题主色调方案、激活菜单和列表背景色和主题快捷方式等功能。"
+
+msgid "Advanced Edit"
+msgstr "进阶参数编辑"
+
+msgid "Wallpaper Source"
+msgstr "壁纸来源"
+
+msgid "Status Homekey settings"
+msgstr "首页状态快捷键设置"
+
+msgid "Shortcut Ssrkey settings"
+msgstr "飞机快捷键设置"
+
+msgid "System Userkey settings"
+msgstr "系统快捷键设置"
+
+msgid "Care mode (large font)"
+msgstr "关怀模式(大字体)"
+
+msgid "Color palette"
+msgstr "调色板工具"
+
+msgid "Local wallpaper"
+msgstr "本地壁纸库"
+
+msgid "Online Bing wallpaper"
+msgstr "Bing在线壁纸"
+
+msgid "Auto download wallpaper"
+msgstr "自动下载unsplash壁纸"
+
+msgid "Call up your favorite color value tool (note: HEX and RGB colors) "
+msgstr "调出自己喜欢的颜色值工具(注意:HEX和RGB值区别) "
+
+msgid "Color scheme list"
+msgstr "颜色配置方案列表"
+
+msgid "Theme mode"
+msgstr "主题模式"
+
+msgid "Primary Color(HEX)"
+msgstr "主色调(HEX)"
+
+msgid "Main Background color(RGB)"
+msgstr "主背景色(RGB)"
+
+msgid "Secondary Background color(RGB)"
+msgstr "副背景色(RGB)"
+
+msgid "Background transparency"
+msgstr "背景透明度"
+
+msgid "Light"
+msgstr "亮色"
+
+msgid "Dark"
+msgstr "暗色"
+
+msgid "RoyalBlue"
+msgstr "皇家高端蓝"
+
+msgid "MediumSeaGreen"
+msgstr "中海清爽绿"
+
+msgid "SandyBrown"
+msgstr "桑迪布朗黄"
+
+msgid "RomatoRed"
+msgstr "番茄别样红"
+
+msgid "Upload (Free:)"
+msgstr "上传 (剩余空间：)"
+
+msgid "You can upload files such as jpg,png,gif files, To change the login page background."
+msgstr "你可以上传jpg、png、gif文件，以创建自己喜欢的登录界面"
+
+msgid "Upload file to"
+msgstr "文件将上传到"
+
+msgid "Background file list"
+msgstr "背景文件列表"
