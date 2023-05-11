@@ -22,11 +22,20 @@ msgstr "网络设置"
 msgid "wan_interface"
 msgstr "WAN口接口"
 
+msgid "Enable DNS notifications (ipv4/ipv6)"
+msgstr "开启DNS通告(ipv4/ipv6)"
+
+msgid "(The IP of the current LAN)"
+msgstr "(当前LAN的IP)"
+
+msgid "Use local IP for DNS (default)"
+msgstr "本机IP做DNS使用（默认）"
+
 msgid "Wireless Settings"
 msgstr "无线设置"
 
-msgid "Allocate the physical interface of WAN port, and the side route can not be selected"
-msgstr "分配Wan口的物理接口,旁路由可不选择."
+msgid "Allocate the physical interface of WAN port"
+msgstr "分配Wan口的物理接口"
 
 msgid "interface<font color=\"red\">(*)</font>"
 msgstr "接口<font color=\"red\">(*)</font>"
@@ -43,7 +52,7 @@ msgstr "四种上网方式:DHCP动态获取/PPPoe拨号/静态地址/旁路由�
 msgid "Set the router's wireless name and password. For more advanced settings, please go to the Network-Wireless page."
 msgstr "设置路由器的无线名字和密码，更多高级设置请进入 网络-无线 页面."
 
-msgid "Other Settings"
+msgid "Other setting"
 msgstr "其它设置"
 
 msgid "For specific usage, see:"
@@ -52,17 +61,17 @@ msgstr "具体使用方法参见："
 msgid "SideRouter"
 msgstr "旁路模式"
 
-msgid "Please enter the primary routing IP address. The next routing gateway and the next routing IP must be a network segment"
-msgstr "请输入主路由IP地址,旁路网关和旁路IP需是一个网段."
+msgid "Please enter the main routing IP address. The bypass gateway is not the same as the login IP of this bypass WEB and is in the same network segment"
+msgstr "请输入主路由IP地址,旁路网关与此旁路WEB登陆IP不相同并且必须在一个网段."
 
-msgid "If not selected, DHCP is disabled by default. If DHCP is used, the main route DHCP needs to be turned off. To disable DHCP, you need to manually change all Internet device gateways and DNS to this routing IP"
-msgstr "不选择默认为禁用DHCP，如使用DHCP，需关闭主路由DHCP。禁用DHCP，需手动将所有Internet设备网关和DNS更改为此路由IP"
+msgid "The default selection is to enable the DHCP server. In a network, only one DHCP server is needed to allocate and manage client IP. If it is a side route, it is recommended to turn off the main routing DHCP server."
+msgstr "默认选择开启DHCP服务器。一个网络中只需要一个DHCP服务器分配管理客户机IP，如果是旁路由建议关闭主路由DHCP服务器。"
 
 msgid "Disable IPv6"
 msgstr "禁用IPv6"
 
-msgid "Remove IPv6"
-msgstr "移除IPv6"
+msgid "Select IPv6 mode"
+msgstr "选择IPv6模式"
 
 msgid "IPv6 Server mode"
 msgstr "IPv6服务模式"
@@ -73,17 +82,17 @@ msgstr "IPv6中继模式"
 msgid "IPv6 Hybird mode"
 msgstr "IPv6混合模式"
 
-msgid "Select IPv6 mode"
-msgstr "选择IPv6模式"
+msgid "Remove IPv6"
+msgstr "移除IPv6"
 
 msgid "Caution: If you delete IPV6 related plug-ins completely, you will not be able to recover"
 msgstr "慎重：彻底删除IPV6相关插件，删除后无法恢复"
 
-msgid "If it is not selected, IPv6 will be enabled, if it is selected, IPv6 will be disabled"
-msgstr "不选择为启用IPV6，选择为禁用IPV6"
-
 msgid "Lan IPv4 address"
 msgstr "内网IP地址"
+
+msgid "You must specify the IP address of this machine, which is the IP address of the web access route"
+msgstr "必须指定此机器IP地址,即该路由web访问的IP地址"
 
 msgid "Lan IPv4 gateway"
 msgstr "网关(主路由IP)"
@@ -100,6 +109,12 @@ msgstr "Wan口子网掩码"
 msgid "Wan IPv4 gateway"
 msgstr "Wan口网关"
 
+msgid "Use iptables to force all TCP/UDP DNS 53ports in IPV4/IPV6 to be forwarded from this route[Suggest opening]"
+msgstr "用iptables强制IPV4/IPV6所有TCP/UDP DNS 53端口走此路由解析[建议打开]"
+
+msgid "Custom firewall"
+msgstr "自定义防火墙"
+
 msgid "Use custom Wan DNS"
 msgstr "自定义Wan口的DNS"
 
@@ -109,14 +124,29 @@ msgstr "自定义旁路由DNS"
 msgid "Enable DHCP Server"
 msgstr "启用DHCP服务"
 
-msgid "Disable Wizard"
-msgstr "启用向导"
+msgid "Force the DNS server in the DHCP server to be specified as the IP for this route"
+msgstr "强制指定DHCP服务器中DNS服务器为此路由的IP"
 
-msgid "Enable/Disable Wizard"
-msgstr "启用/禁用向导"
+msgid "Enable IP dynamic camouflage"
+msgstr "启用IP动态伪装"
 
-msgid "Enable snat forward"
-msgstr "开启动态伪装转发"
+msgid "Enable IP dynamic camouflage when the side routing network is not ideal"
+msgstr "启用IP动态伪装，当旁路网络速度不理想时开启"
 
-msgid "Select to enable dynamic camouflage forwarding,It is enabled when Xiaomi Huawei's primary route cannot be used normally"
-msgstr "选择表示开启动态伪装转发,当小米华为做主路由无法正常使用时开启"
+msgid "Enable SYN-flood defense"
+msgstr "启用 SYN-flood 防御"
+
+msgid "Enable Firewall SYN-flood defense [Suggest opening]"
+msgstr "启用防火墙SYN-flood防洪攻击[建议打开]"
+
+msgid "Firewall regulations"
+msgstr "防火墙规定"
+
+msgid "Bypass firewall settings, when Xiaomi or Huawei are used as the main router, the WIFI signal cannot be used normally"
+msgstr "旁路防火墙设置,当小米或者华为等做为主路由后WIFI信号无法正常使用开启."
+
+msgid "Show or hide the setup wizard menu. After hiding, you can open the display wizard menu in [Advanced Settings] [Advanced] or use the 3rd function in the background to restore the wizard and default theme."
+msgstr "显示或隐藏设置向导菜单，隐藏后在[进阶设置][高级]可以开启显示向导菜单或在后台用3号功能恢复向导和默认主题。"
+
+msgid "Hide Wizard"
+msgstr "隐藏设置向导"
