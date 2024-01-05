@@ -1,35 +1,24 @@
-# Copyright (C) 2019  sirpdboy <https://github.com/sirpdboy/luci-app-advanced/>
-# 
 #
-#
+# Copyright 2023-2024 sirpdboy team <herboy2008@gmail.com>
 # This is free software, licensed under the Apache License, Version 2.0 .
-# 
+#
 
 include $(TOPDIR)/rules.mk
-include $(INCLUDE_DIR)/package.mk
+NAME:=advancedplus
+PKG_NAME:=luci-app-$(NAME)
+LUCI_TITLE:=LuCI support for Kucat theme setting by sirpdboy
+LUCI_DEPENDS:=+luci-compat +curl
+LUCI_PKGARCH:=all
 
-PKG_NAME:=luci-app-advancedplus
-PKG_VERSION:=1.42
-PKG_RELEASE:=20230424
-define Package/$(PKG_NAME)
-  SECTION:=luci
-  CATEGORY:=LuCI
-  SUBMENU:=3. Applications
-  DEPENDS:=
-   TITLE:=LuCI Support for advancedplus and filebrowser
-   PKGARCH:=all
+PKG_VERSION:=1.7.5
+PKG_RELEASE:=20240102
+
+define Package/$(PKG_NAME)/conffiles
+/etc/config/advancedplus
 endef
 
-define Build/Compile
-endef
+include $(TOPDIR)/feeds/luci/luci.mk
 
-define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
-	$(CP) ./luasrc/* $(1)/usr/lib/lua/luci
-	
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) ./root/etc/config/advancedplus $(1)/etc/config/
-	
-endef
+# call BuildPackage - OpenWrt buildroot signature
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+
