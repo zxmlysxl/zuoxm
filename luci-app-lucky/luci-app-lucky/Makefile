@@ -7,12 +7,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-lucky
-PKG_VERSION:=1.0.4
-PKG_RELEASE:=4
+PKG_VERSION:=1.2.0
+PKG_RELEASE:=8
 
 LUCI_TITLE:=LuCI Support for Dynamic lucky Client
 LUCI_DEPENDS:=+lucky
 LUCI_PKGARCH:=all
+
+define Package/$(PKG_NAME)/conffiles
+/etc/config/lucky
+/etc/lucky/lucky.conf
+endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

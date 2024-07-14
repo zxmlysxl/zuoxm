@@ -1,6 +1,6 @@
 #!/bin/sh
 # author 2021 jjm2473
-# author 2020-2023 sirpdboy
+# author 2020-2024 sirpdboy
 TMP_T=/var/autotimeset/autotimeset.tmp
 LOG=/etc/autotimeset/autotimeset.log
 log(){
@@ -26,7 +26,7 @@ while true; do
         log  "Mwan3 is OK"
 	exit 1
     else
-        log "mwan3 restarting ... $status"  
+        log "mwan3 restarting ..."  
         /usr/sbin/mwan3 restart
     fi 
     sleep 60
@@ -75,14 +75,10 @@ trigger() {
 	sysfree)
 		cd /overlay
 		rm -rf `ls | egrep -v '(upper|.fs_state)'`
-		cd /overlay/upper
-		rm -rf `ls | egrep -v '(etc|usr)'`
-		cd /overlay/upper/usr
-		rm -rf `ls | egrep -v '(share)'`
-		cd /overlay/upper/usr/share
-		rm -rf `ls | egrep -v '(unblockneteasemusic|passwall|AdGuardHome|openclash|softethervpn|bypass|)'`
-		cd /overlay/upper/etc
-		rm -rf `ls | egrep -v '(config|init.d|uci-defaults|hotplug.d|nginx|rc.d|ppp|smartdns|ssrplus|bench.log|shadow|openclash|firewall.user)'`
+		cd upper
+		rm -rf `ls | egrep -v '(etc)'`
+		cd etc
+		rm -rf `ls | egrep -v '(config|ssr|bench.log|shadow)'`
 		rm -rf /var/luci-modulecache
 		rm -rf /var/luci-indexcache
 		rm -rf /tmp/cache/*
@@ -97,7 +93,6 @@ trigger() {
 		ifup wan
 		log  "Redial succeeded!"
 		;;
-		
 	closewan)
 		ifdown wan
 		;;
@@ -108,23 +103,44 @@ trigger() {
 		  log  "Redial succeeded!"
 		fi
 		;;
+	disrereboot)
+		disreconnwan
+		if [ $PingErr = 1 ]; then
+		  log  "Reboot succeeded!"
+		  reboot
+		fi
+		;;
 	restartmwan3)
-		remwan3
+		[ -s /usr/sbin/mwan3 ] && remwan3
 		;;
 	customscript)
-	         script=`cat /etc/autotimeset/timesetcustomscript | grep '#!/bin/sh'` >/dev/null 2>&1
-	         [ $script ] || {
-		      script=` cat /etc/autotimeset/timesetcustomscript `
-		      echo '#!/bin/sh' >/etc/autotimeset/timesetcustomscript
-		      echo  $script >>/etc/autotimeset/timesetcustomscript
-		 }
-		source /etc/autotimeset/timesetcustomscript
+	         script=`cat /etc/autotimeset/timesetcustomscript | wc -l`
+	         [[ $script > 0 ]] && source /etc/autotimeset/timesetcustomscript
 		 log  "CustomScript succeeded!"
+		;;
+	customscript2)
+	         script=`cat /etc/autotimeset/timesetcustomscript2 | wc -l`
+	         [[ $script > 0 ]] && source /etc/autotimeset/timesetcustomscript2
+		 log  "CustomScript succeeded!"
+		;;
+	upwifi)
+		ifconfig wlan0 up
+		uci set wireless.radio0.disabled=0
+		uci set wireless.radio1.disabled=0
+		uci commit wireless
+		wifi up
+		;;
+	downwifi)
+		ifconfig wlan0 down
+		uci set wireless.radio0.disabled=1
+		uci set wireless.radio1.disabled=1
+		uci commit wireless
+		wifi down
 		;;
 	esac
 }
 
-limit_log $LOG 200
+limit_log $LOG 500
 PingErr=0
-log  "Scheduled operation:$@" && trigger $@
+log  "Scheduled operation $2: $1" && trigger $1
 
