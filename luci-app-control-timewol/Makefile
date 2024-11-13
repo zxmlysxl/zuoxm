@@ -5,11 +5,11 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI support for Timewol From Koolshare
-LUCI_DEPENDS:=+wol +etherwake
+LUCI_TITLE:=LuCI support for Timewol
+LUCI_DEPENDS:=+etherwake
 LUCI_PKGARCH:=all
-PKG_VERSION:=2.2
-PKG_RELEASE:=20200927
+PKG_VERSION:=1.1
+PKG_RELEASE:=1
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

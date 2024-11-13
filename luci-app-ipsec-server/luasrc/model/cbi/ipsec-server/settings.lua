@@ -1,126 +1,64 @@
-local s=require"luci.sys"
-local net = require "luci.model.network".init()
-local ifaces = s.net:devices()
-local m, s, o
-mp = Map("ipsec", translate("IPSec VPN Server"))
-mp.description = translate(
-                     "IPSec VPN connectivity using the native built-in VPN Client on iOS or Andriod (IKEv1 with PSK and Xauth)")
-mp.template="ipsec-server/index"
+local sys = require "luci.sys"
 
-s=mp:section(TypedSection,"service")
-s.anonymous=true
-o=s:option(DummyValue,"ipsec-server_status",translate("Current Condition"))
-o.template="ipsec-server/status"
+m = Map("luci-app-ipsec-server", translate("IPSec VPN Server"))
+m.template = "ipsec-server/ipsec-server_status"
+
+s = m:section(TypedSection, "service")
+s.anonymous = true
+
+o = s:option(DummyValue, "ipsec-server_status", translate("Current Condition"))
+o.rawhtml = true
+o.cfgvalue = function(t, n)
+	return '<font class="ipsec-server_status"></font>'
+end
+
 enabled = s:option(Flag, "enabled", translate("Enable"))
+enabled.description = translate("Use a client that supports IPSec Xauth PSK (iOS or Android) to connect to this server.")
 enabled.default = 0
 enabled.rmempty = false
 
-useLanDHCP = s:option(Flag, "useLanDHCP", translate("useLanDHCP"))
-useLanDHCP.default = 1
-useLanDHCP.rmempty = false
-
 clientip = s:option(Value, "clientip", translate("VPN Client IP"))
+clientip.description = translate("VPN Client reserved started IP addresses with the same subnet mask, such as: 192.168.100.10/24")
 clientip.datatype = "ip4addr"
-clientip.description = translate("VPN Client reserved started IP addresses with the same subnet mask")
 clientip.optional = false
 clientip.rmempty = false
-
-lanDHCPServer = s:option(Value, "lanDHCPServer", translate("lanDHCPServer"))
-lanDHCPServer.datatype = "ip4addr"
-lanDHCPServer.optional = false
-lanDHCPServer.rmempty = false
-
---[[
-]]--
-
-clientdns = s:option(Value, "clientdns", translate("VPN Client DNS"))
-clientdns.datatype = "ip4addr"
-clientdns.description = translate("DNS using in VPN tunnel.")
-clientdns.optional = false
-clientdns.rmempty = false
 
 secret = s:option(Value, "secret", translate("Secret Pre-Shared Key"))
 secret.password = true
 
-ikev2enabled = s:option(Flag, "ikev2enabled", translate("ikev2enabled"),
-		      translate("请在启用前，将路由DDNS域名证书(PEM格式)按路径放好。CA及中间证书保存到/etc/ipsec.d/cacerts中，" ..
-			            "域名证书保存到/etc/ipsec.d/certs并且命名为SERVER.crt，域名证书私钥保存到/etc/ipsec.d/private" ..
-						"并且命名为KEY.key。"))
-ikev2enabled.default = 0
-ikev2enabled.rmempty = false
+if sys.call("command -v xl2tpd > /dev/null") == 0 then
+	o = s:option(DummyValue, "l2tp_status", "L2TP " .. translate("Current Condition"))
+	o.rawhtml = true
+	o.cfgvalue = function(t, n)
+		return '<font class="l2tp_status"></font>'
+	end
 
-routerDomain = s:option(Value, "routerDomain", translate("routerDomain"),
-		      translate("请输入路由DDNS域名，需要和证书中域名一致，不支持通配符证书。"))
-routerDomain.rmempty = false
+	o = s:option(Flag, "l2tp_enable", "L2TP " .. translate("Enable"))
+	o.description = translate("Use a client that supports L2TP over IPSec PSK to connect to this server.")
+	o.default = 0
+	o.rmempty = false
 
-function mp.on_save(self)
-    require "luci.model.uci"
-    require "luci.sys"
+	o = s:option(Value, "l2tp_localip", "L2TP " .. translate("Server IP"))
+	o.description = translate("VPN Server IP address, such as: 192.168.101.1")
+	o.datatype = "ip4addr"
+	o.rmempty = true
+	o.default = "192.168.101.1"
+	o.placeholder = o.default
 
-    local have_ike_rule = false
-    local have_ipsec_rule = false
-    local have_ah_rule = false
-    local have_esp_rule = false
+	o = s:option(Value, "l2tp_remoteip", "L2TP " .. translate("Client IP"))
+	o.description = translate("VPN Client IP address range, such as: 192.168.101.10-20")
+	o.rmempty = true
+	o.default = "192.168.101.10-20"
+	o.placeholder = o.default
 
-    luci.model.uci.cursor():foreach('firewall', 'rule', function(section)
-        if section.name == 'ike' then have_ike_rule = true end
-        if section.name == 'ipsec' then have_ipsec_rule = true end
-        if section.name == 'ah' then have_ah_rule = true end
-        if section.name == 'esp' then have_esp_rule = true end
-    end)
-
-    if not have_ike_rule then
-        local cursor = luci.model.uci.cursor()
-        local ike_rulename = cursor:add('firewall', 'rule')
-        cursor:tset('firewall', ike_rulename, {
-            ['name'] = 'ike',
-            ['target'] = 'ACCEPT',
-            ['src'] = 'wan',
-            ['proto'] = 'udp',
-            ['dest_port'] = 500
-        })
-        cursor:save('firewall')
-        cursor:commit('firewall')
-    end
-    if not have_ipsec_rule then
-        local cursor = luci.model.uci.cursor()
-        local ipsec_rulename = cursor:add('firewall', 'rule')
-        cursor:tset('firewall', ipsec_rulename, {
-            ['name'] = 'ipsec',
-            ['target'] = 'ACCEPT',
-            ['src'] = 'wan',
-            ['proto'] = 'udp',
-            ['dest_port'] = 4500
-        })
-        cursor:save('firewall')
-        cursor:commit('firewall')
-    end
-    if not have_ah_rule then
-        local cursor = luci.model.uci.cursor()
-        local ah_rulename = cursor:add('firewall', 'rule')
-        cursor:tset('firewall', ah_rulename, {
-            ['name'] = 'ah',
-            ['target'] = 'ACCEPT',
-            ['src'] = 'wan',
-            ['proto'] = 'ah'
-        })
-        cursor:save('firewall')
-        cursor:commit('firewall')
-    end
-    if not have_esp_rule then
-        local cursor = luci.model.uci.cursor()
-        local esp_rulename = cursor:add('firewall', 'rule')
-        cursor:tset('firewall', esp_rulename, {
-            ['name'] = 'esp',
-            ['target'] = 'ACCEPT',
-            ['src'] = 'wan',
-            ['proto'] = 'esp'
-        })
-        cursor:save('firewall')
-        cursor:commit('firewall')
-    end
-
+	if sys.call("ls -L /usr/lib/ipsec/libipsec* 2>/dev/null >/dev/null") == 0 then 
+		o = s:option(DummyValue, "_o", " ")
+		o.rawhtml = true
+		o.cfgvalue = function(t, n)
+			return string.format('<a style="color: red">%s</a>', translate("L2TP/IPSec is not compatible with kernel-libipsec, which will disable this module."))
+		end
+		o:depends("l2tp_enable", true)
+	end
 end
 
-mp:append(Template("ipsec-server/setup"))
-return mp
+return m

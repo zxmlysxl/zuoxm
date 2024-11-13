@@ -1,36 +1,75 @@
 #!/bin/sh /etc/rc.common
-# Auth0r=wulishui, <wulishui@gmail.com> , 20200926
+#
+# Copyright (C) 2015 OpenWrt-dist
+# Copyright (C) 2016 fw867 <ffkykzs@gmail.com>
+#
+# This is free software, licensed under the GNU General Public License v3.
+# See /LICENSE for more information.
+#
 
-START=93
+START=99
 
+CONFIG=timewol
 
-start(){
-enabled=`uci get timewol.@basic[0].enabled 2>/dev/null` && ENsum=`grep -c 'enable .1.' /etc/config/timewol`
-if [ "$enabled" == 1 -a "$ENsum" -gt 0 ]; then
-sed -i '/timewol/d' /etc/crontabs/root 2>/dev/null
-[ -s /etc/crontabs/root ] || mcronrst=1
-tool=$(uci get timewol.@basic[0].tool 2>/dev/null)
-ipmask=`uci get network.lan.ipaddr 2>/dev/null|awk -F '.' '{print $1"."$2"."$3".255"}'`
-rulessum=$(grep -c 'macclient' /etc/config/timewol)
-for i in $(seq 0 $((rulessum-1)))
-do
-enable=$(uci get timewol.@macclient[$i].enable 2>/dev/null)
-if [ "$enable" == 1 ]; then
- minute=`uci get timewol.@macclient[$i].minute 2>/dev/null` ; [ -z "$minute" -o "$minute" = "*" ] && minute="00"
- hour=`uci get timewol.@macclient[$i].hour 2>/dev/null` || hour="*"
- day=`uci get timewol.@macclient[$i].day 2>/dev/null` || day="*"
- month=`uci get timewol.@macclient[$i].month 2>/dev/null` || month="*"
- weeks=`uci get timewol.@macclient[$i].weeks 2>/dev/null` || weeks="*"
- maceth=`uci get timewol.@macclient[$i].maceth 2>/dev/null` || maceth="br-lan"
- [ "$tool" = "etherwake" ] && TCMD="/usr/bin/etherwake -i ${maceth}" || TCMD="/usr/bin/wakeonlan -i ${ipmask}"
- macaddr=`uci get timewol.@macclient[$i].macaddr 2>/dev/null` && echo "${minute} ${hour} ${day} ${month} ${weeks} ${TCMD} ${macaddr} # By timewol" >> /etc/crontabs/root
-fi
-done
-[ "$mcronrst" == 1 ] && /etc/init.d/cron restart
-fi
+uci_get_by_type() {
+	local index=0
+	if [ -n $4 ]; then
+		index=$4
+	fi
+	local ret=$(uci get $CONFIG.@$1[$index].$2 2>/dev/null)
+	echo ${ret:=$3}
 }
 
+is_true() {
+	case $1 in
+		1|on|true|yes|enabled) echo 0;;
+		*) echo 1;;
+	esac
+}
+
+load_config() {
+	ENABLED=$(uci_get_by_type basic enable)
+	return $(is_true $ENABLED)
+}
+
+add_rule(){
+	local items=$(uci show ${CONFIG} | grep "=macclient" | cut -d '.' -sf 2 | cut -d '=' -sf 1)
+	for i in $items; do
+		local macaddr=$(uci -q get ${CONFIG}.${i}.macaddr)
+		local maceth=$(uci -q get ${CONFIG}.${i}.maceth)
+		local minute=$(uci -q get ${CONFIG}.${i}.minute)
+		local hour=$(uci -q get ${CONFIG}.${i}.hour)
+		local day=$(uci -q get ${CONFIG}.${i}.day)
+		local month=$(uci -q get ${CONFIG}.${i}.month)
+		local weeks=$(uci -q get ${CONFIG}.${i}.weeks)
+		if [ -z $macaddr ] || [ -z $maceth ]; then
+			continue
+		fi
+		if [ -z $minute ] ; then
+			minute="0"
+		fi
+		if [ -z $hour ] ; then
+			hour="*"
+		fi
+		if [ -z $day ] ; then
+			day="*"
+		fi
+		if [ -z $month ] ; then
+			month="*"
+		fi
+		if [ -z $weeks ] ; then
+			weeks="*"
+		fi
+		echo "$minute $hour $day $month $weeks /usr/bin/etherwake -D -i $maceth $macaddr" >> /etc/crontabs/root
+		unset macaddr maceth minute hour day month weeks
+	done
+}
+
+start() {
+	stop
+    ! load_config && exit 0
+    add_rule
+}
 stop() {
- sed -i '/timewol/d' /etc/crontabs/root 2>/dev/null
+	sed -i '/etherwake/d' /etc/crontabs/root >/dev/null 2>&1
 }
-
