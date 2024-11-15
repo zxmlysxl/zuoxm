@@ -1,5 +1,6 @@
 #!/bin/sh /etc/rc.common
 # sirpdboy at 2021-2023 , <herboy2008@gmail.com>
+#Fixed by zxmlysxl 2024-11-14 www.zxmvps.com
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 MY_PATH=$DIR/iptables.sh
@@ -61,7 +62,6 @@ esac
 idlist=`uci show $CONFIG | grep "enable='1'" | grep "$mmode" | grep -oE '\[.*?\]' | grep -o '[0-9]'`
 elog "set_rules:$mmode" 
 for i in $idlist ; do
-    wweek=""  # 将 wweek 设置为空字符串，以确保每次循环开始时都是干净的
     mac=$(uci -q get $CONFIG.@$mmode[$i].mac ) && MAC="-m mac --mac-source $mac" || MAC=""
     timestart=$(uci get $CONFIG.@$mmode[$i].timestart 2>/dev/null) || timestart="00:00"
     timeend=$(uci get $CONFIG.@$mmode[$i].timeend 2>/dev/null) || timeend="00:00"
@@ -110,7 +110,7 @@ for i in $idlist ; do
             ;; 
         *) ;;
     esac
-    unset STR MAC WT PTO Z1 Z2 Z3 Z4 Z5 Z6 Z7  # 最好也在这里unset掉局部变量，以避免潜在的问题
+    unset STR MAC WT PTO Z1 Z2 Z3 Z4 Z5 Z6 Z7
 done
 }
 
