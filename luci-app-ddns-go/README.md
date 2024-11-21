@@ -1,7 +1,8 @@
+## 访问数：![hello](https://views.whatilearened.today/views/github/sirpdboy/deplives.svg)[![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
 ### 访问数：[![](https://visitor-badge.glitch.me/badge?page_id=sirpdboy-visitor-badge)] [![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明1.jpg)
-
+欢迎来到sirpdboy的源码仓库！
+=
 # luci-app-ddns-go
 
 luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对应的域名服务。支持的域名服务商 Alidns(阿里云) Dnspod(腾讯云) Cloudflare 华为云 Callback 百度云 porkbun GoDaddy
@@ -9,6 +10,7 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 [![若部分图片无法正常显示，请挂上机场浏览或点这里到末尾看修复教程](https://visitor-badge.glitch.me/badge?page_id=sirpdboy-visitor-badge)](#解决-github-网页上图片显示失败的问题) [![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
 
 [luci-app-ddns-go  ddns-go动态域名插件](https://github.com/sirpdboy/luci-app-ddns-go)
+
 ======================
 
 
@@ -49,24 +51,7 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 
 - 将luci-app-ddns-go添加至 LEDE/OpenWRT 源码的方法。
 
-### 下载源码方法一：
-- 编辑源码文件夹根目录feeds.conf.default并加入如下内容:
-
-```Brach
-
-    # feeds获取源码：
-	
-    src-git luci-app-ddns-go https://github.com/sirpdboy/luci-app-ddns-go
- ``` 
-  ```Brach
-  
-   # 更新feeds，并安装主题：
-   
-    scripts/feeds update luci-app-ddns-go
-	scripts/feeds install luci-app-ddns-go
- ``` 	
-
-### 下载源码方法二：
+### 下载源码方法：
 
  ```Brach
  
@@ -95,15 +80,11 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 -源码来源：https://github.com/sirpdboy/luci-app-ddns-go
 -你可以随意使用其中的源码，但请注明出处。
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明2.jpg)
+============================
 
 ## 界面
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo1.jpg)
-
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo2.jpg)
-
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo3.jpg)
+![screenshots](https://raw.githubusercontent.com/jeessy2/ddns-go/master/ddns-web.png)
 
 
 # My other project
@@ -122,12 +103,10 @@ btmob 主题: https://github.com/sirpdboy/luci-theme-btmob
 
 系统高级设置 : https://github.com/sirpdboy/luci-app-advanced
 
-ddns-go动态域名: https://github.com/sirpdboy/luci-app-ddns-go
-
-
 ## 捐助
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明3.jpg)
+-如果你觉得此项目对你有帮助，请捐助我们，以使项目能持续发展，更加完善。··请作者喝杯咖啡~~~**
+-你们的支持就是我的动力！**
 
 |     <img src="https://img.shields.io/badge/-支付宝-F5F5F5.svg" href="#赞助支持本项目-" height="25" alt="图飞了😂"/>  |  <img src="https://img.shields.io/badge/-微信-F5F5F5.svg" height="25" alt="图飞了😂" href="#赞助支持本项目-"/>  | 
 | :-----------------: | :-------------: |
