@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 NAME:=parentcontrol
 PKG_NAME:=luci-app-$(NAME)
 PKG_VERSION:=1.7.2
-PKG_RELEASE:=20241114
+PKG_RELEASE:=20250317
 PKG_LICENSE:=Apache-2.0
 
 LUCI_TITLE:=LuCI support for Parent Control
@@ -22,3 +22,5 @@ endef
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
+
+
