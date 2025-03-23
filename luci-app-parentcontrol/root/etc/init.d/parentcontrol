@@ -64,7 +64,6 @@ for i in $idlist ;do
     timestart=$(uci -q get $CONFIG.@$mmode[$i].timestart ) || timestart="00:00"
     timeend=$(uci -q get $CONFIG.@$mmode[$i].timeend) ||  timeend="00:00"
     wweek=$(uci -q get $CONFIG.@$mmode[$i].week )  || wweek='*'
-    local Z1,Z2,Z3,Z4,Z5,Z6,Z7=0,0,0,0,0,0,0
     for ww in `echo $wweek | sed 's/,/ /g' `; do 
         [ "$ww" == "1" ] && Z1="Mon,"
         [ "$ww" == "2" ] && Z2="Tue,"
