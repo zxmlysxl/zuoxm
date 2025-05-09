@@ -132,9 +132,35 @@ del_rule() {
   done
 }
 
+# 硬件时间同步函数
+sync_hardware_clock() {
+    # 获取系统时间（秒数）
+    SYS_TIME=$(date +%s)
+    
+    # 获取硬件时间（秒数），兼容不同hwclock版本
+    HW_TIME=$(hwclock --show --date="$(date '+%Y-%m-%d %H:%M:%S')" +%s 2>/dev/null || \
+              hwclock -r --date="$(date '+%Y-%m-%d %H:%M:%S')" +%s 2>/dev/null)
+    
+    # 计算绝对值时间差（秒）
+    TIME_DIFF=$(( SYS_TIME - HW_TIME ))
+    ABS_DIFF=${TIME_DIFF#-}  # 取绝对值
+
+    # 如果差异超过30秒，则同步
+    if [ "$ABS_DIFF" -gt 30 ]; then
+        hwclock --systohc --localtime
+        elog "Hardware clock synchronized (Drift: ${TIME_DIFF} seconds)"
+    else
+        elog "Hardware clock in sync (Drift: ${TIME_DIFF} seconds, no action)"
+    fi
+}
+
 start(){
      [ -f $LOCK ] && exit 1
      del_rule
+     
+     # 调用时间同步函数
+    sync_hardware_clock
+    
      enabled=`uci -q get $CONFIG.@basic[0].enabled`
      [ "x$enabled" == "x1" ] || exit 1
      allsum=`grep -c 'enable .1.' /etc/config/$CONFIG`
