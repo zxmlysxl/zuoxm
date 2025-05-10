@@ -33,32 +33,41 @@ clean_log() {
 set_rules() {
 mmode=$1
    case $mmode in
-    time)
-	  controlmode=`uci -q get $CONFIG.@basic[0].control_mode`
-	  [ "x$controlmode" == 'x1' ] && chain=INPUT || chain=FORWARD
-          for ip in "$ipt" "$ipt6" ; do
-                  $ip -N $TAG 2>/dev/null || $i -F $TAG 2>/dev/null 
-                  $ip -C $chain -j  $TAG 2>/dev/null ||  $ip -I $chain -j  $TAG 2>/dev/null
-	  done
-    ;;
-    protocol)
-       chain=FORWARD
-       for ip in "$ipt" "$ipt6" ; do
-                  $ip -N $TAGP 2>/dev/null || $i -F $TAGP 2>/dev/null 
-                  $ip -C $chain -j  $TAGP 2>/dev/null ||  $ip -I $chain -j  $TAGP 2>/dev/null
-      done
-    
-    ;;
-    weburl)
-      chain=OUTPUT
-      algos=`uci -q get $CONFIG.@basic[0].algos` 
-      for ip in "$ipt" "$ipt6" ; do
-                  $ip -N $TAGW 2>/dev/null || $i -F $TAGW 2>/dev/null 
-                  $ip -C $chain -j  $TAGW 2>/dev/null ||  $ip -I $chain -j  $TAGW 2>/dev/null
-      done
-    
-    ;;
-esac  
+        time)
+            controlmode=$(uci -q get "$CONFIG.@basic[0].control_mode")
+            if [ "x$controlmode" = "x1" ]; then
+                # control_mode=1时同时应用于INPUT和FORWARD链
+                for chain in INPUT FORWARD; do
+                    for ip in "$ipt" "$ipt6"; do
+                        $ip -N "$TAG" 2>/dev/null || $ip -F "$TAG" 2>/dev/null
+                        $ip -C "$chain" -j "$TAG" 2>/dev/null || $ip -I "$chain" -j "$TAG" 2>/dev/null
+                    done
+                done
+            else
+                # 其他情况仅应用于FORWARD链
+                chain=FORWARD
+                for ip in "$ipt" "$ipt6"; do
+                    $ip -N "$TAG" 2>/dev/null || $ip -F "$TAG" 2>/dev/null
+                    $ip -C "$chain" -j "$TAG" 2>/dev/null || $ip -I "$chain" -j "$TAG" 2>/dev/null
+                done
+            fi
+            ;;
+        protocol)
+            chain=FORWARD
+            for ip in "$ipt" "$ipt6"; do
+                $ip -N "$TAGP" 2>/dev/null || $ip -F "$TAGP" 2>/dev/null
+                $ip -C "$chain" -j "$TAGP" 2>/dev/null || $ip -I "$chain" -j "$TAGP" 2>/dev/null
+            done
+            ;;
+        weburl)
+            chain=OUTPUT
+            algos=$(uci -q get "$CONFIG.@basic[0].algos")
+            for ip in "$ipt" "$ipt6"; do
+                $ip -N "$TAGW" 2>/dev/null || $ip -F "$TAGW" 2>/dev/null
+                $ip -C "$chain" -j "$TAGW" 2>/dev/null || $ip -I "$chain" -j "$TAGW" 2>/dev/null
+            done
+            ;;
+    esac  
 idlist=`uci show $CONFIG | grep "enable='1'" | grep "$mmode" | grep -oE '\[.*?\]' | grep -o '[0-9]'`
 elog "set_rules:$mmode" 
 for i in $idlist ; do
@@ -178,7 +187,3 @@ stop(){
      del_rule
      rm -f $LOCK  2>/dev/null
 }
-
-
-
-
