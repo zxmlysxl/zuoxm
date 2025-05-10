@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 # sirpdboy at 2021-2023 , <herboy2008@gmail.com>
-#Fixed by zxmlysxl 2024-11-14 www.zxmvps.com
+#Fixed by zxmlysxl 2025-05-10 www.zxmvps.com
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 MY_PATH=$DIR/iptables.sh
