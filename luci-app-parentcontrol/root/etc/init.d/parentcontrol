@@ -1,7 +1,7 @@
 #!/bin/sh /etc/rc.common
 # sirpdboy at 2021-2023 , <herboy2008@gmail.com>
 #2025-05-07启动时判断硬件时间和系统时间，不一致则同步；by zxmlysxl
-#Fixed by zxmlysxl 2025-05-10 www.zxmvps.com
+#2025-06-12时间控制同时将被控设备加入到DNAT规则中，防止修改网关绕过管控
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 MY_PATH=$DIR/iptables.sh
@@ -92,7 +92,10 @@ for i in $idlist ; do
         time)
             for pt in "$ipt" "$ipt6" ; do
                 $pt -I $TAG ${MAC} ${WT} -j REJECT 2>/dev/null 
+                # 添加DNAT规则，将流量重定向到路由器
+                $pt -t nat -I PREROUTING ${MAC} ${WT} -j DNAT --to-destination $(uci get network.lan.ipaddr 2>/dev/null || echo "192.168.32.1") 2>/dev/null
                 elog "$mmode:$pt -- ${MAC} -- ${WT}  "
+                elog "Added DNAT rule for MAC ${MAC} during ${WT} to redirect to router"
             done
             ;;
         protocol)
@@ -124,22 +127,24 @@ for i in $idlist ; do
 done
 }
 
-flush_include() {
-	echo '#!/bin/sh' >$FWI
-}
-
 del_rule() {
   for ip in "$ipt" "$ipt6" ; do
       for ta in "$TAG" "$TAGW" "$TAGP" ; do
-	 for chain in "PREROUTING" "FORWARD" "OUTPUT" "INPUT" ; do
-	     	$ip -D  $chain -j $ta 2>/dev/null
-		
-		elog "delrule: $ip -- $ta -- ${chain} "
-	 done
-	 $ip -F $ta 2>/dev/null
-	 $ip -X $ta 2>/dev/null
+         for chain in "PREROUTING" "FORWARD" "OUTPUT" "INPUT" ; do
+                $ip -D  $chain -j $ta 2>/dev/null
+                elog "delrule: $ip -- $ta -- ${chain} "
+         done
+         $ip -F $ta 2>/dev/null
+         $ip -X $ta 2>/dev/null
       done
+      # 清理DNAT规则
+      $ip -t nat -F PREROUTING 2>/dev/null
+      elog "Cleared all DNAT rules in PREROUTING chain"
   done
+}
+
+flush_include() {
+	echo '#!/bin/sh' >$FWI
 }
 
 # 硬件时间同步函数
