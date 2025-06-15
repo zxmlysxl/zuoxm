@@ -1,195 +1,192 @@
 #!/bin/sh /etc/rc.common
-# sirpdboy at 2021-2023 , <herboy2008@gmail.com>
-#2025-05-07启动时判断硬件时间和系统时间，不一致则同步；by zxmlysxl
-#2025-06-12时间控制同时将被控设备加入到DNAT规则中，防止修改网关绕过管控
+# 家长控制终极防御版
+# 版本：v2.7 - 完整防御+错误处理
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
-MY_PATH=$DIR/iptables.sh
+USE_PROCD=1
 START=98
+STOP=98
 
 CONFIG=parentcontrol
-LOG_FILE=/tmp/log/$CONFIG.log
-LOCK_DIR=/tmp/lock
-LOCK=/tmp/lock/${CONFIG}.lock
+LOG_FILE="/tmp/log/$CONFIG.log"
+LOCK="/tmp/lock/${CONFIG}.lock"
 ipt=$(command -v iptables-legacy || command -v iptables)
 ipt6=$(command -v ip6tables-legacy || command -v ip6tables)
 
-TAG="PARENTCONTROL_TIME" 
-TAGP="PARENTCONTROL_PROTOCOL" 
-TAGW="PARENTCONTROL_WEBURL" 
-FWI="/var/etc/$CONFIG.include"
+# 防御链命名
+TAG="PARENTCONTROL_TIME"
+TAGP="PARENTCONTROL_PROTOCOL"
+TAGW="PARENTCONTROL_WEBURL"
+ROUTER_IP=$(uci get network.lan.ipaddr 2>/dev/null || echo "192.168.32.1")
+
 elog() {
-	local d="$(date "+%Y-%m-%d %H:%M:%S")"
-	echo -e "$d: $*" >>$LOG_FILE
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $*" >>$LOG_FILE
 }
 
-clean_log() {
-	[ `cat $LOG_FILE  | wc -l ` -gt 500 ] && {
-		elog "clear log ."
-	}
+init_ebtables() {
+    if ! command -v ebtables >/dev/null; then
+        elog "警告：ebtables未安装，二层防御将失效"
+        return 1
+    fi
+    
+    # 创建专用链并防止重复添加
+    if ! ebtables -L PARENTCTRL >/dev/null 2>&1; then
+        ebtables -N PARENTCTRL
+        ebtables -I FORWARD -j PARENTCTRL
+    fi
+    ebtables -F PARENTCTRL
+    return 0
 }
-
-
 
 set_rules() {
-mmode=$1
-   case $mmode in
-        time)
-            controlmode=$(uci -q get "$CONFIG.@basic[0].control_mode")
-            if [ "x$controlmode" = "x1" ]; then
-                # control_mode=1时同时应用于INPUT和FORWARD链
-                for chain in INPUT FORWARD; do
-                    for ip in "$ipt" "$ipt6"; do
-                        $ip -N "$TAG" 2>/dev/null || $ip -F "$TAG" 2>/dev/null
-                        $ip -C "$chain" -j "$TAG" 2>/dev/null || $ip -I "$chain" -j "$TAG" 2>/dev/null
-                    done
-                done
-            else
-                # 其他情况仅应用于FORWARD链
-                chain=FORWARD
-                for ip in "$ipt" "$ipt6"; do
-                    $ip -N "$TAG" 2>/dev/null || $ip -F "$TAG" 2>/dev/null
-                    $ip -C "$chain" -j "$TAG" 2>/dev/null || $ip -I "$chain" -j "$TAG" 2>/dev/null
-                done
-            fi
-            ;;
-        protocol)
-            chain=FORWARD
-            for ip in "$ipt" "$ipt6"; do
-                $ip -N "$TAGP" 2>/dev/null || $ip -F "$TAGP" 2>/dev/null
-                $ip -C "$chain" -j "$TAGP" 2>/dev/null || $ip -I "$chain" -j "$TAGP" 2>/dev/null
-            done
-            ;;
-        weburl)
-            chain=OUTPUT
-            algos=$(uci -q get "$CONFIG.@basic[0].algos")
-            for ip in "$ipt" "$ipt6"; do
-                $ip -N "$TAGW" 2>/dev/null || $ip -F "$TAGW" 2>/dev/null
-                $ip -C "$chain" -j "$TAGW" 2>/dev/null || $ip -I "$chain" -j "$TAGW" 2>/dev/null
-            done
-            ;;
-    esac  
-idlist=`uci show $CONFIG | grep "enable='1'" | grep "$mmode" | grep -oE '\[.*?\]' | grep -o '[0-9]'`
-elog "set_rules:$mmode" 
-for i in $idlist ; do
-    mac=$(uci -q get $CONFIG.@$mmode[$i].mac ) && MAC="-m mac --mac-source $mac" || MAC=""
-    timestart=$(uci get $CONFIG.@$mmode[$i].timestart 2>/dev/null) || timestart="00:00"
-    timeend=$(uci get $CONFIG.@$mmode[$i].timeend 2>/dev/null) || timeend="00:00"
-    wweek=$(uci get $CONFIG.@$mmode[$i].week | sed 's/ /,/g' 2>/dev/null)
-    for ww in `echo $wweek | sed 's/,/ /g' `; do 
-        [ "$ww" == "1" ] && local Z1="Mon,"
-        [ "$ww" == "2" ] && local Z2="Tue,"
-        [ "$ww" == "3" ] && local Z3="Wed,"
-        [ "$ww" == "4" ] && local Z4="Thu,"
-        [ "$ww" == "5" ] && local Z5="Fri,"
-        [ "$ww" == "6" ] && local Z6="Sat,"
-        [ "$ww" == "7" ] && local Z7="Sun"
-    done
-    [ -z "$timestart" -o -z "$timeend" -o "$timestart" = "$timeend" ] && TIME="" || TIME="--timestart ${timestart} --timestop ${timeend}"
-    [ -z "$wweek" -o "$wweek" = "*" ] && WEEK="" || WEEK="--weekdays $Z1$Z2$Z3$Z4$Z5$Z6$Z7"
-    [ -n "$TIME" -o -n "$WEEK" ] && WT="-m time --kerneltz ${TIME} ${WEEK}" || WT=""
+    mmode=$1
+    idlist=$(uci show $CONFIG | grep "enable='1'" | grep "$mmode" | grep -oE '\[.*?\]' | grep -o '[0-9]')
+    [ -z "$idlist" ] && return
+
     case $mmode in
         time)
-            for pt in "$ipt" "$ipt6" ; do
-                $pt -I $TAG ${MAC} ${WT} -j REJECT 2>/dev/null 
-                # 添加DNAT规则，将流量重定向到路由器
-                $pt -t nat -I PREROUTING ${MAC} ${WT} -j DNAT --to-destination $(uci get network.lan.ipaddr 2>/dev/null || echo "192.168.32.1") 2>/dev/null
-                elog "$mmode:$pt -- ${MAC} -- ${WT}  "
-                elog "Added DNAT rule for MAC ${MAC} during ${WT} to redirect to router"
+            # 初始化链
+            controlmode=$(uci -q get "$CONFIG.@basic[0].control_mode")
+            [ "x$controlmode" = "x1" ] && chains="INPUT FORWARD" || chains="FORWARD"
+            
+            for chain in $chains; do
+                for ip in "$ipt" "$ipt6"; do
+                    $ip -N "$TAG" 2>/dev/null
+                    $ip -F "$TAG" 2>/dev/null
+                    $ip -I $chain -j "$TAG"
+                done
+            done
+
+            # 时间规则
+            for i in $idlist; do
+                mac=$(uci -q get $CONFIG.@$mmode[$i].mac)
+                [ -z "$mac" ] && continue
+                
+                # 时间条件
+                timestart=$(uci get $CONFIG.@$mmode[$i].timestart 2>/dev/null) || timestart="00:00"
+                timeend=$(uci get $CONFIG.@$mmode[$i].timeend 2>/dev/null) || timeend="00:00"
+                wweek=$(uci get $CONFIG.@$mmode[$i].week | sed 's/ /,/g' 2>/dev/null)
+                
+                # 防御规则
+                for ip in "$ipt" "$ipt6"; do
+                    # 基础规则
+                    $ip -I $TAG -m mac --mac-source $mac \
+                        -m time --timestart $timestart --timestop $timeend \
+                        --weekdays $(echo $wweek | sed 's/1/Mon/g;s/2/Tue/g;s/3/Wed/g;s/4/Thu/g;s/5/Fri/g;s/6/Sat/g;s/7/Sun/g') \
+                        -j REJECT
+                    
+                    # 增强防御
+                    $ip -t nat -I PREROUTING -m mac --mac-source $mac -j DNAT --to-destination $ROUTER_IP
+                    $ip -I FORWARD -m mac --mac-source $mac ! -d $ROUTER_IP -j DROP
+                    $ip -I FORWARD -m mac --mac-source $mac -m state --state NEW -j DROP
+                done
+
+                # 二层防御
+                if init_ebtables; then
+                    ebtables -A PARENTCTRL -s $mac -j DROP && \
+                    elog "二层防御生效: $mac"
+                fi
             done
             ;;
+
         protocol)
-            proto=$(uci -q get $CONFIG.@$mmode[$i].proto ) || proto="tcp"
-            ports=$(uci -q get $CONFIG.@$mmode[$i].ports ) && SPO="--sport ${ports}" || SPO=""
-            portd=$(uci -q get $CONFIG.@$mmode[$i].portd ) && DPO="--dport ${portd}" || DPO=""
-            mMPT=`echo "$ports"|grep ","` && mSPO="-m multiport" || mSPO=""
-            mMPT=`echo "$portd"|grep ","` && mDPO="-m multiport" || mDPO=""
-            [ -z "$ports" -a -z "$portd" ] && PTO="" || PTO="-p ${proto} ${mSPO} ${SPO} ${mDPO} ${DPO}"
-            for pt in "$ipt" "$ipt6" ; do
-                $pt -I $TAGP ${MAC} ${WT} ${PTO} -j REJECT 2>/dev/null 
-                elog "$mmode: $pt -- ${MAC} -- ${WT} -- ${PTO}"
+            # 初始化链
+            for ip in "$ipt" "$ipt6"; do
+                $ip -N "$TAGP" 2>/dev/null
+                $ip -F "$TAGP" 2>/dev/null
+                $ip -I FORWARD -j "$TAGP"
+            done
+
+            # 协议规则
+            for i in $idlist; do
+                mac=$(uci -q get $CONFIG.@$mmode[$i].mac)
+                [ -z "$mac" ] && continue
+                
+                proto=$(uci -q get $CONFIG.@$mmode[$i].proto) || proto="tcp"
+                ports=$(uci -q get $CONFIG.@$mmode[$i].ports)
+                portd=$(uci -q get $CONFIG.@$mmode[$i].portd)
+                
+                for ip in "$ipt" "$ipt6"; do
+                    [ -n "$ports" ] && $ip -I $TAGP -m mac --mac-source $mac -p $proto -m multiport --sports $ports -j REJECT
+                    [ -n "$portd" ] && $ip -I $TAGP -m mac --mac-source $mac -p $proto -m multiport --dports $portd -j REJECT
+                done
             done
             ;;
+
         weburl)
-            word=$(uci -q get $CONFIG.@$mmode[$i].word ) && STR="-m string --algo ${algos} --string ${word}" || STR=""
-            word2=$(uci -q get $CONFIG.@$mmode[$i].word ) && STR2="-m string --algo ${algos} --hex-string ${word2}" || STR2=""
-            for pt in "$ipt" "$ipt6" ; do
-                $pt -I $TAGW -p UDP --dport 53 ${MAC} ${WT} ${STR} -j DROP 2>/dev/null
-                $pt -I $TAGW -p UDP --dport 53 ${MAC} ${WT} ${STR2} -j DROP 2>/dev/null
-                $pt -I $TAGW -p TCP --dport 853 ${MAC} ${WT} ${STR} -j DROP 2>/dev/null
-                $pt -I $TAGW -p TCP --dport 853 ${MAC} ${WT} ${STR2} -j DROP 2>/dev/null
-                elog "$mmode: $pt -- ${MAC} -- ${WT} -- ${STR}"
+            # 初始化链
+            algos=$(uci -q get "$CONFIG.@basic[0].algos")
+            for ip in "$ipt" "$ipt6"; do
+                $ip -N "$TAGW" 2>/dev/null
+                $ip -F "$TAGW" 2>/dev/null
+                $ip -I OUTPUT -j "$TAGW"
             done
-            ;; 
-        *) ;;
+
+            # URL规则
+            for i in $idlist; do
+                mac=$(uci -q get $CONFIG.@$mmode[$i].mac)
+                [ -z "$mac" ] && continue
+                
+                word=$(uci -q get $CONFIG.@$mmode[$i].word)
+                [ -n "$word" ] && for ip in "$ipt" "$ipt6"; do
+                    $ip -I $TAGW -m mac --mac-source $mac -p udp --dport 53 -m string --algo $algos --string "$word" -j DROP
+                    $ip -I $TAGW -m mac --mac-source $mac -p tcp --dport 853 -m string --algo $algos --string "$word" -j DROP
+                done
+            done
+            ;;
     esac
-    unset STR MAC WT PTO Z1 Z2 Z3 Z4 Z5 Z6 Z7
-done
 }
 
 del_rule() {
-  for ip in "$ipt" "$ipt6" ; do
-      for ta in "$TAG" "$TAGW" "$TAGP" ; do
-         for chain in "PREROUTING" "FORWARD" "OUTPUT" "INPUT" ; do
-                $ip -D  $chain -j $ta 2>/dev/null
-                elog "delrule: $ip -- $ta -- ${chain} "
-         done
-         $ip -F $ta 2>/dev/null
-         $ip -X $ta 2>/dev/null
-      done
-      # 清理DNAT规则
-      $ip -t nat -F PREROUTING 2>/dev/null
-      elog "Cleared all DNAT rules in PREROUTING chain"
-  done
-}
-
-flush_include() {
-	echo '#!/bin/sh' >$FWI
-}
-
-# 硬件时间同步函数
-sync_hardware_clock() {
-    # 获取系统时间（秒数）
-    SYS_TIME=$(date +%s)
+    # 清理iptables
+    for ip in "$ipt" "$ipt6"; do
+        for chain in "PREROUTING" "FORWARD" "INPUT" "OUTPUT"; do
+            for target in "$TAG" "$TAGP" "$TAGW"; do
+                while $ip -D $chain -j $target 2>/dev/null; do :; done
+            done
+            $ip -F $chain 2>/dev/null
+        done
+        
+        for chain in "$TAG" "$TAGP" "$TAGW"; do
+            $ip -F $chain 2>/dev/null
+            $ip -X $chain 2>/dev/null
+        done
+        
+        $ip -t nat -F PREROUTING 2>/dev/null
+    done
     
-    # 获取硬件时间（秒数），兼容不同hwclock版本
-    HW_TIME=$(hwclock --show --date="$(date '+%Y-%m-%d %H:%M:%S')" +%s 2>/dev/null || \
-              hwclock -r --date="$(date '+%Y-%m-%d %H:%M:%S')" +%s 2>/dev/null)
-    
-    # 计算绝对值时间差（秒）
-    TIME_DIFF=$(( SYS_TIME - HW_TIME ))
-    ABS_DIFF=${TIME_DIFF#-}  # 取绝对值
-
-    # 如果差异超过30秒，则同步
-    if [ "$ABS_DIFF" -gt 30 ]; then
-        hwclock --systohc --localtime
-        elog "Hardware clock synchronized (Drift: ${TIME_DIFF} seconds)"
-    else
-        elog "Hardware clock in sync (Drift: ${TIME_DIFF} seconds, no action)"
+    # 清理ebtables
+    if command -v ebtables >/dev/null; then
+        ebtables -F PARENTCTRL 2>/dev/null
+        ebtables -X PARENTCTRL 2>/dev/null
     fi
 }
 
-start(){
-     [ -f $LOCK ] && exit 1
-     del_rule
-     
-     # 调用时间同步函数
-    sync_hardware_clock
+start() {
+    [ -f $LOCK ] && exit 1
+    touch $LOCK
     
-     enabled=`uci -q get $CONFIG.@basic[0].enabled`
-     [ "x$enabled" == "x1" ] || exit 1
-     allsum=`grep -c 'enable .1.' /etc/config/$CONFIG`
-     [ "$allsum" -gt 0 ] && {
-        touch $LOCK
+    del_rule
+    init_ebtables
+    
+    enabled=$(uci -q get $CONFIG.@basic[0].enabled)
+    [ "x$enabled" = "x1" ] && {
         set_rules time
-	set_rules protocol
-	set_rules weburl
+        set_rules protocol
+        set_rules weburl
+        elog "服务启动成功 - 防御层级：L2+L3"
     }
-     clean_log 
-     rm -f $LOCK  2>/dev/null
+    
+    rm -f $LOCK
 }
 
-stop(){
-     del_rule
-     rm -f $LOCK  2>/dev/null
+stop() {
+    del_rule
+    rm -f $LOCK
+    elog "服务已停止"
+}
+
+restart() {
+    stop
+    sleep 1
+    start
 }
