@@ -1,0 +1,27 @@
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: 
+          - { url: "https://github.com/sirpdboy/luci-app-advancedplus.git", dir: "luci-app-store", dest: "store" }
+          - { url: "https://github.com/repoB.git", dir: "luci-app-lucky",  dest: "lucky" }
+          - { url: "https://github.com/repoC.git", dir: "luci-app-adguard", dest: "adguard" }
+    steps:
+      - uses: actions/checkout@v4
+      - run: |  
+          git clone --filter=blob:none --no-checkout ${{ matrix.repo.url }} src_repo
+          cd src_repo
+          git sparse-checkout set ${{ matrix.repo.dir }}
+          git checkout main
+          cp -r ${{ matrix.repo.dir }} ../${{ matrix.repo.dest }}
+          cd ..
+          rm -rf src_repo
+      - name: Commit and Push
+        if: matrix.repo.dir == 'luci-app-adguard'  
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Sync: ${{ join(matrix.repo.*, ', ') }}"
+          git push
