@@ -10,32 +10,69 @@ jobs:
     strategy:
       matrix:
         repo: 
-          - { url: "https://github.com/sirpdboy/luci-app-advancedplus.git", dir: "luci-app-advancedplus", dest: "advancedplus" }
-          - { url: "https://github.com/sirpdboy/luci-theme-kucat.git", dir: "luci-theme-kucat", dest: "kucat" }
-          - { url: "https://github.com/sirpdboy/luci-app-netwizard.git", dir: "luci-app-netwizard", dest: "netwizard" }
-          - { url: "https://github.com/sirpdboy/luci-app-netspeedtest.git", dir: "luci-app-netspeedtest", dest: "netspeedtest" }
-          - { url: "https://github.com/sirpdboy/luci-app-netdata.git", dir: "luci-app-netdata", dest: "netdata" }
-          - { url: "https://github.com/sirpdboy/luci-app-timecontrol.git", dir: "luci-app-nft-timecontrol", dest: "timecontrol" }
-          - { url: "https://github.com/sirpdboy/luci-app-taskplan.git", dir: "luci-app-taskplan", dest: "taskplan" }
-          - { url: "https://github.com/sirpdboy/luci-app-poweroffdevice.git", dir: "luci-app-poweroffdevice", dest: "poweroffdevice" }
-          - { url: "https://github.com/linkease/istore.git", dir: "luci-app-store",  dest: "store" }
-          - { url: "https://github.com/tty228/luci-app-wechatpush.git", dir: "luci-app-wechatpush", dest: "wechatpush" }
-          - { url: "https://github.com/gdy666/luci-app-lucky.git", dir: "luci-app-lucky", dest: "lucky" }
+          # sirpdboy 的仓库使用 master 分支
+          - { url: "https://github.com/sirpdboy/luci-app-advancedplus.git", dir: "luci-app-advancedplus", dest: "advancedplus", branch: "main" }
+          - { url: "https://github.com/sirpdboy/luci-theme-kucat.git", dir: "luci-theme-kucat", dest: "kucat", branch: "js" }
+          - { url: "https://github.com/sirpdboy/luci-app-netwizard.git", dir: "luci-app-netwizard", dest: "netwizard", branch: "main" }
+          - { url: "https://github.com/sirpdboy/luci-app-netspeedtest.git", dir: "luci-app-netspeedtest", dest: "netspeedtest", branch: "js" }
+          - { url: "https://github.com/sirpdboy/luci-app-netdata.git", dir: "luci-app-netdata", dest: "netdata", branch: "master" }
+          - { url: "https://github.com/sirpdboy/luci-app-timecontrol.git", dir: "luci-app-nft-timecontrol", dest: "timecontrol", branch: "main" }
+          - { url: "https://github.com/sirpdboy/luci-app-taskplan.git", dir: "luci-app-taskplan", dest: "taskplan", branch: "master" }
+          - { url: "https://github.com/sirpdboy/luci-app-poweroffdevice.git", dir: "luci-app-poweroffdevice", dest: "poweroffdevice", branch: "js" }
+          # 其他仓库使用 main 分支
+          - { url: "https://github.com/linkease/istore.git", dir: "luci-app-store", dest: "store", branch: "main" }
+          - { url: "https://github.com/tty228/luci-app-wechatpush.git", dir: "luci-app-wechatpush", dest: "wechatpush", branch: "master" }
+          - { url: "https://github.com/gdy666/luci-app-lucky.git", dir: "luci-app-lucky", dest: "lucky", branch: "main" }
     steps:
       - uses: actions/checkout@v4
-      - run: |  
-          git clone --filter=blob:none --no-checkout ${{ matrix.repo.url }} src_repo
+        with:
+          fetch-depth: 0  # 获取完整历史记录
+      
+      - name: Sync ${{ matrix.repo.dir }}
+        run: |
+          echo "▶️ 开始同步 ${{ matrix.repo.url }} (分支: ${{ matrix.repo.branch }})"
+          
+          # 克隆仓库（不检出文件）
+          git clone --filter=blob:none \
+                   --no-checkout \
+                   --branch ${{ matrix.repo.branch }} \
+                   ${{ matrix.repo.url }} src_repo
+          
           cd src_repo
-          git sparse-checkout set ${{ matrix.repo.dir }}
-          git checkout main
-          cp -r ${{ matrix.repo.dir }} ../${{ matrix.repo.dest }}
+          
+          # 设置稀疏检出
+          git sparse-checkout init --cone
+          echo "${{ matrix.repo.dir }}" > .git/info/sparse-checkout
+          
+          # 检出文件
+          git checkout ${{ matrix.repo.branch }}
+          
+          # 复制文件
+          mkdir -p ../${{ matrix.repo.dest }}
+          cp -r ${{ matrix.repo.dir }}/* ../${{ matrix.repo.dest }}/
+          
           cd ..
           rm -rf src_repo
-      - name: Commit and Push
-        if: matrix.repo.dir == 'luci-app-lucky'  
+          echo "✅ 同步完成"
+          
+        continue-on-error: true  # 单个仓库失败不影响其他任务
+
+      - name: Commit and Push Changes
+        if: matrix.repo.dir == 'luci-app-lucky'  # 只在最后一个任务提交
         run: |
+          # 设置Git身份
           git config --global user.name "zxmlysxl"
           git config --global user.email "zxmlysxl@gmail.com"
+          
+          # 添加所有变更
           git add .
-          git commit -m "Sync: ${{ join(matrix.repo.*, ', ') }}"
+          
+          # 生成提交信息
+          COMMIT_MSG="Sync: "
+          for item in ${{ toJson(matrix.repo) }}; do
+            COMMIT_MSG+="$item, "
+          done
+          
+          # 提交并推送
+          git commit -m "${COMMIT_MSG%??}"  # 移除最后的逗号和空格
           git push
