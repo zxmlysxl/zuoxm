@@ -1,50 +1,23 @@
+# SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2020-2021 sirpdboy <herboy2008@gmail.com>
-# The LuCI Network diagnosis and speed test <https://github.com/sirpdboy/NetSpeedTest>
-# This is free software, licensed under the GNU General Public License v3.
-# 
+# Copyright (C) 2021-2025  sirpdboy  <herboy2008@gmail.com> 
+# https://github.com/sirpdboy/luci-app-netspeedtest
+# This is free software, licensed under the Apache License, Version 2.0 .
+#
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-netspeedtest
-PKG_VERSION:=1.7
-PKG_RELEASE:=20220322
-PKG_LICENSE:=GPLv2
-PKG_MAINTAINER:=sirpdboy
 
-include $(INCLUDE_DIR)/package.mk
+PKG_VERSION:=5.0.5
+PKG_RELEASE:=20250612
 
-define Package/$(PKG_NAME)
-	SECTION:=luci
-	CATEGORY:=LuCI
-	SUBMENU:=3. Applications
-	TITLE:=LuCI Support for netspeedtest
-	DEPENDS:=+python3 +iperf3
-	PKGARCH:=all
-endef
+LUCI_TITLE:=LuCI Support for netspeedtest
+LUCI_DEPENDS:=+speedtest-cli +homebox +netspeedtest $(if $(find_package iperf3-ssl),+iperf3-ssl,+iperf3)
+LUCI_PKGARCH:=all
+PKG_MAINTAINER:=sirpdboy  <herboy2008@gmail.com>
+
+include $(TOPDIR)/feeds/luci/luci.mk
 
 
-define Build/Compile
-endef
-
-define Package/$(PKG_NAME)/conffiles
-/etc/config/netspeedtest
-endef
-
-define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
-	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./root/etc/init.d/netspeedtest  $(1)/etc/init.d/
-
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) ./root/etc/config/netspeedtest $(1)/etc/config/
-	$(INSTALL_DIR) $(1)/usr/sbin/
-	$(INSTALL_BIN) ./root/usr/sbin/speedtest $(1)/usr/sbin/
-	
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	po2lmo ./po/zh-cn/netspeedtest.po $(1)/usr/lib/lua/luci/i18n/netspeedtest.zh-cn.lmo
-endef
-
-$(eval $(call BuildPackage,$(PKG_NAME)))
-
+# call BuildPackage - OpenWrt buildroot signature
