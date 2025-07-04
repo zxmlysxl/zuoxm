@@ -20,7 +20,7 @@ jobs:
           - { url: "https://github.com/sirpdboy/luci-app-taskplan.git", dir: "luci-app-taskplan", dest: "taskplan", branch: "master" }
           - { url: "https://github.com/sirpdboy/luci-app-poweroffdevice.git", dir: "luci-app-poweroffdevice", dest: "poweroffdevice", branch: "js" }
           # 其他仓库
-          - { url: "https://github.com/linkease/istore.git", dir: "luci-app-store", dest: "store", branch: "main" }
+          - { url: "https://github.com/linkease/istore.git", dir: ".", dest: "store", branch: "main" }
           - { url: "https://github.com/tty228/luci-app-wechatpush.git", dir: "luci-app-wechatpush", dest: "wechatpush", branch: "master" }
           - { url: "https://github.com/gdy666/luci-app-lucky.git", dir: "luci-app-lucky", dest: "lucky", branch: "main" }
     steps:
